@@ -8,6 +8,30 @@
 </head>
 <body>
     <h1>Tic Tac Toe</h1>
+    <div id="mode-select">
+        <label>
+            <input type="radio" name="mode" value="pvp" checked>
+            Player vs. Player
+        </label>
+        <label>
+            <input type="radio" name="mode" value="pvb">
+            Player vs. Bot
+        </label>
+    </div>
+    <div id="difficulty-select" style="display: none;">
+        <label>
+            <input type="radio" name="difficulty" value="easy" checked>
+            Easy
+        </label>
+        <label>
+            <input type="radio" name="difficulty" value="medium">
+            Medium
+        </label>
+        <label>
+            <input type="radio" name="difficulty" value="hard">
+            Hard
+        </label>
+    </div>
     <div id="turn-indicator">Turn: <span id="current-player">X</span></div>
     <div id="game">
         <div class="cell" data-index="0"></div>
