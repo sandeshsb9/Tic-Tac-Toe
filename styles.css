@@ -16,6 +16,16 @@ h1 {
     color: #333;
 }
 
+#mode-select, #difficulty-select {
+    margin-bottom: 20px;
+}
+
+#mode-select label, #difficulty-select label {
+    margin-right: 20px;
+    font-size: 1.2em;
+    color: #555;
+}
+
 #turn-indicator {
     margin-bottom: 20px;
     font-size: 1.2em;
@@ -92,6 +102,10 @@ h1 {
 @media (max-width: 480px) {
     h1 {
         font-size: 2em;
+    }
+
+    #mode-select label, #difficulty-select label {
+        font-size: 1em;
     }
 
     #turn-indicator {
