@@ -1,4 +1,3 @@
-// script.js
 document.addEventListener('DOMContentLoaded', () => {
     const cells = document.querySelectorAll('.cell');
     const restartButton = document.getElementById('restart');
@@ -6,8 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal');
     const modalMessage = document.getElementById('modal-message');
     const closeModalButton = document.getElementById('close-modal');
+    const modeSelect = document.getElementById('mode-select');
+    const difficultySelect = document.getElementById('difficulty-select');
     let currentPlayer = 'X';
     let gameState = ['', '', '', '', '', '', '', '', ''];
+    let gameMode = 'pvp';
+    let difficulty = 'easy';
     const winningPatterns = [
         [0, 1, 2],
         [3, 4, 5],
@@ -25,6 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     restartButton.addEventListener('click', restartGame);
     closeModalButton.addEventListener('click', closeModal);
+    modeSelect.addEventListener('change', (event) => {
+        gameMode = event.target.value;
+        difficultySelect.style.display = gameMode === 'pvb' ? 'block' : 'none';
+        restartGame();
+    });
+    difficultySelect.addEventListener('change', (event) => {
+        difficulty = event.target.value;
+        restartGame();
+    });
 
     function handleCellClick(event) {
         const cell = event.target;
@@ -46,7 +58,46 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
             currentPlayerDisplay.textContent = currentPlayer;
+
+            if (gameMode === 'pvb' && currentPlayer === 'O') {
+                botMove(); // No timeout for immediate response
+            }
         }
+    }
+
+    function botMove() {
+        setTimeout(() => {
+            let move;
+            if (difficulty === 'easy') {
+                move = getRandomMove();
+            } else if (difficulty === 'medium') {
+                move = minimax(gameState, 'O', 2).index; // Depth 2 for medium
+            } else { // 'hard' level
+                move = minimax(gameState, 'O', 4).index; // Depth 4 for hard
+            }
+
+            gameState[move] = 'O';
+            const cell = document.querySelector(`.cell[data-index='${move}']`);
+            cell.textContent = 'O';
+            cell.classList.add('o');
+
+            if (checkWinner()) {
+                showModal('O wins!');
+                highlightWinningCells();
+            } else if (gameState.every(cell => cell !== '')) {
+                showModal('Draw!');
+            } else {
+                currentPlayer = 'X';
+                currentPlayerDisplay.textContent = currentPlayer;
+            }
+        }, 500); // Add delay for better UX
+    }
+
+    function getRandomMove() {
+        const availableMoves = gameState
+            .map((cell, index) => (cell === '' ? index : null))
+            .filter(index => index !== null);
+        return availableMoves[Math.floor(Math.random() * availableMoves.length)];
     }
 
     function checkWinner() {
@@ -86,5 +137,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeModal() {
         modal.style.display = 'none';
+    }
+
+    function minimax(newGameState, player, depth) {
+        const availableMoves = newGameState
+            .map((cell, index) => (cell === '' ? index : null))
+            .filter(index => index !== null);
+
+        if (checkWinningPattern(newGameState, 'X')) {
+            return { score: -10 };
+        } else if (checkWinningPattern(newGameState, 'O')) {
+            return { score: 10 };
+        } else if (availableMoves.length === 0 || depth === 0) {
+            return { score: 0 };
+        }
+
+        const moves = [];
+
+        availableMoves.forEach(move => {
+            const newGameStateCopy = newGameState.slice();
+            newGameStateCopy[move] = player;
+
+            const result =
+                player === 'O'
+                    ? minimax(newGameStateCopy, 'X', depth - 1)
+                    : minimax(newGameStateCopy, 'O', depth - 1);
+            moves.push({
+                index: move,
+                score: result.score
+            });
+        });
+
+        let bestMove;
+        if (player === 'O') {
+            let bestScore = -Infinity;
+            moves.forEach(move => {
+                if (move.score > bestScore) {
+                    bestScore = move.score;
+                    bestMove = move;
+                }
+            });
+        } else {
+            let bestScore = Infinity;
+            moves.forEach(move => {
+                if (move.score < bestScore) {
+                    bestScore = move.score;
+                    bestMove = move;
+                }
+            });
+        }
+        return bestMove;
+    }
+
+    function checkWinningPattern(gameState, player) {
+        return winningPatterns.some(pattern => {
+            return pattern.every(index => gameState[index] === player);
+        });
     }
 });
