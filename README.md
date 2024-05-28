@@ -73,7 +73,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Contact
 
-If you have any questions or feedback, feel free to reach out to the project owner at [sandeshsb9@example.com](mailto:sandeshsb9@example.com).
+If you have any questions or feedback, feel free to reach out to the project owner at sandeshsb9).
 
 ---
 
