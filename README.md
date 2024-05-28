@@ -12,7 +12,7 @@ Welcome to the Tic Tac Toe game project! This repository contains a web-based Ti
 
 ## Demo
 
-![Tic Tac Toe Screenshot](img/picc.png)
+![Tic Tac Toe Screenshot](https://github.com/sandeshsb9/Tic-Tac-Toe/blob/master/img/picc2.png)
 
 ## Installation
 
