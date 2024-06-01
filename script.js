@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cell = event.target;
         const cellIndex = cell.getAttribute('data-index');
 
-        if (gameState[cellIndex] !== '' || checkWinner()) {
+        if (gameState[cellIndex] !== '' || checkWinner(gameState, currentPlayer)) {
             return;
         }
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.textContent = currentPlayer;
         cell.classList.add(currentPlayer.toLowerCase());
 
-        if (checkWinner()) {
+        if (checkWinner(gameState, currentPlayer)) {
             showModal(`${currentPlayer} wins!`);
             highlightWinningCells();
         } else if (gameState.every(cell => cell !== '')) {
@@ -71,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (difficulty === 'easy') {
                 move = getRandomMove();
             } else if (difficulty === 'medium') {
-                move = minimax(gameState, 'O', 2).index; // Depth 2 for medium
+                move = minimax(gameState, 'O', 4, -Infinity, Infinity).index; // Depth 4 for medium
             } else { // 'hard' level
-                move = minimax(gameState, 'O', 4).index; // Depth 4 for hard
+                move = minimax(gameState, 'O', 8, -Infinity, Infinity).index; // Depth 8 for hard
             }
 
             gameState[move] = 'O';
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.textContent = 'O';
             cell.classList.add('o');
 
-            if (checkWinner()) {
+            if (checkWinner(gameState, 'O')) {
                 showModal('O wins!');
                 highlightWinningCells();
             } else if (gameState.every(cell => cell !== '')) {
@@ -100,11 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return availableMoves[Math.floor(Math.random() * availableMoves.length)];
     }
 
-    function checkWinner() {
+    function checkWinner(gameState, player) {
         return winningPatterns.some(pattern => {
-            return pattern.every(index => {
-                return gameState[index] === currentPlayer;
-            });
+            return pattern.every(index => gameState[index] === player);
         });
     }
 
@@ -139,14 +137,14 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'none';
     }
 
-    function minimax(newGameState, player, depth) {
+    function minimax(newGameState, player, depth, alpha, beta) {
         const availableMoves = newGameState
             .map((cell, index) => (cell === '' ? index : null))
             .filter(index => index !== null);
 
-        if (checkWinningPattern(newGameState, 'X')) {
+        if (checkWinner(newGameState, 'X')) {
             return { score: -10 };
-        } else if (checkWinningPattern(newGameState, 'O')) {
+        } else if (checkWinner(newGameState, 'O')) {
             return { score: 10 };
         } else if (availableMoves.length === 0 || depth === 0) {
             return { score: 0 };
@@ -160,12 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result =
                 player === 'O'
-                    ? minimax(newGameStateCopy, 'X', depth - 1)
-                    : minimax(newGameStateCopy, 'O', depth - 1);
+                    ? minimax(newGameStateCopy, 'X', depth - 1, alpha, beta)
+                    : minimax(newGameStateCopy, 'O', depth - 1, alpha, beta);
             moves.push({
                 index: move,
                 score: result.score
             });
+
+            if (player === 'O') {
+                alpha = Math.max(alpha, result.score);
+                if (beta <= alpha) return result; // Prune
+            } else {
+                beta = Math.min(beta, result.score);
+                if (beta <= alpha) return result; // Prune
+            }
         });
 
         let bestMove;
@@ -187,11 +193,5 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         return bestMove;
-    }
-
-    function checkWinningPattern(gameState, player) {
-        return winningPatterns.some(pattern => {
-            return pattern.every(index => gameState[index] === player);
-        });
     }
 });
